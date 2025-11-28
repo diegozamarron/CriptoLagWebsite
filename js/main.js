@@ -6,7 +6,6 @@ const BACKEND_URL = "https://criptolag.onrender.com";
 let publicKey = null;
 let balanceInterval = null;
 
-// 🔁 MODAL / CHECKS
 function isSupportedBrowser() {
     const ua = navigator.userAgent;
     return (
@@ -42,13 +41,12 @@ async function connectWallet() {
             ua.includes("Chrome") ||
             ua.includes("Firefox") ||
             ua.includes("Edg") ||
-            ua.includes("OPR") ||   // ✅ allow Opera
-            ua.includes("Opera")    // ✅ extra fallback
+            ua.includes("OPR") ||  
+            ua.includes("Opera")    
         );
 
         const phantomAvailable = window.solana && window.solana.isPhantom;
 
-        // 🟡 Main logic: show only one error depending on what's missing
         if (!phantomAvailable && !isSupportedBrowser) {
             throw new Error("Este navegador no es compatible. Porfavor use Chrome, Firefox, Edge o Opera en una computadora de escritorio.");
         }
@@ -57,7 +55,6 @@ async function connectWallet() {
             throw new Error("Phantom Wallet no encontrada. Por favor, instálala desde https://phantom.app.");
         }
 
-        // ✅ Proceed to connect
         const provider = window.solana;
         const response = await provider.connect();
         publicKey = response.publicKey;
@@ -261,4 +258,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     fetchTokenInfo();
 });
+
 
