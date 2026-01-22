@@ -1,11 +1,12 @@
-// ----- Token and Network Configuration -----
-const SOL_MINT = "So11111111111111111111111111111111111111112";
-const CRL_MINT = "9AtC4cXKs7XUGCsoxPcEuMeig68MJwHpn6LXQCgF19DY";
-const BACKEND_URL = "https://criptolag.onrender.com";
+// token variable config
+const SOL_MINT = "So11111111111111111111111111111111111111112"; //SOL mint address
+const CRL_MINT = "9AtC4cXKs7XUGCsoxPcEuMeig68MJwHpn6LXQCgF19DY"; //CRL mint address
+const BACKEND_URL = "https://criptolag.onrender.com"; //backend URL
 
 let publicKey = null;
 let balanceInterval = null;
 
+//check if browser is supported
 function isSupportedBrowser() {
     const ua = navigator.userAgent;
     return (
@@ -27,6 +28,7 @@ function closeWarningModal() {
     document.getElementById("warningModal").style.display = "none";
 }
 
+//connect to the phantom wallet browser extension
 async function connectWallet() {
     const walletStatus = document.getElementById("walletStatus");
     const connectButton = document.getElementById("connectWallet");
@@ -35,6 +37,7 @@ async function connectWallet() {
     walletStatus.textContent = "Connecting...";
 
     try {
+        //detect browser
         const ua = navigator.userAgent;
         const isDesktop = !/Mobi|Android|iPhone|iPad/i.test(ua);
         const isSupportedBrowser = isDesktop && (
@@ -44,9 +47,10 @@ async function connectWallet() {
             ua.includes("OPR") ||  
             ua.includes("Opera")    
         );
-
+        //check if phantom is available
         const phantomAvailable = window.solana && window.solana.isPhantom;
 
+        //show appropriate error message in case of failure
         if (!phantomAvailable && !isSupportedBrowser) {
             throw new Error("Este navegador no es compatible. Porfavor use Chrome, Firefox, Edge o Opera en una computadora de escritorio.");
         }
@@ -54,7 +58,7 @@ async function connectWallet() {
         if (!phantomAvailable && isSupportedBrowser) {
             throw new Error("Phantom Wallet no encontrada. Por favor, instálala desde https://phantom.app.");
         }
-
+        /connect phantom wallet and update UI
         const provider = window.solana;
         const response = await provider.connect();
         publicKey = response.publicKey;
@@ -69,9 +73,11 @@ async function connectWallet() {
             window.phantomEventListenersAttached = true;
         }
 
+        //display balances
         await displaySolBalance();
         await displayTokenBalance(CRL_MINT);
 
+        //update balances every 5 seconds
         if (balanceInterval) clearInterval(balanceInterval);
         balanceInterval = setInterval(() => {
             if (publicKey) {
@@ -94,7 +100,7 @@ async function connectWallet() {
 }
 
 
-
+//disconnect phantom wallet and clear the balances
 async function disconnectWallet() {
     const walletStatus = document.getElementById("walletStatus");
     const connectButton = document.getElementById("connectWallet");
@@ -108,6 +114,7 @@ async function disconnectWallet() {
     walletStatus.textContent = "Disconnecting...";
  
     try {
+        //stop refreshing balances
         if (balanceInterval) {
             clearInterval(balanceInterval);
             balanceInterval = null;
@@ -126,6 +133,7 @@ async function disconnectWallet() {
     }
 }
 
+//update UI on phantom connect
 function onPhantomConnect(newPublicKey) {
     publicKey = newPublicKey;
     const walletStatus = document.getElementById("walletStatus");
@@ -140,6 +148,7 @@ function onPhantomConnect(newPublicKey) {
     displayTokenBalance(CRL_MINT);
 }
 
+//update UI when phantom disconnects
 function onPhantomDisconnect() {
     publicKey = null;
     const walletStatus = document.getElementById("walletStatus");
@@ -156,6 +165,7 @@ function onPhantomDisconnect() {
     CRLbal.textContent = "CRL Balance: N/A";
 }
 
+//fetch SOL balance for connected wallet
 async function displaySolBalance() {
     const SOLbal = document.getElementById("SOLbal");
 
@@ -186,6 +196,7 @@ async function displaySolBalance() {
     }
 }
 
+//fetch CRL balance for connected wallet
 async function displayTokenBalance(tokenMintAddress) {
     const CRLbal = document.getElementById("CRLbal");
 
@@ -227,6 +238,7 @@ async function displayTokenBalance(tokenMintAddress) {
     }
 }
 
+//fetch token info
 async function fetchTokenInfo() {
     try {
         const response = await fetch(`${BACKEND_URL}/token-info`);
@@ -258,5 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     fetchTokenInfo();
 });
+
 
 
