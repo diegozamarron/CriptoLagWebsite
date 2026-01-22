@@ -4,20 +4,25 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 
+//load .env variables
 dotenv.config();
 
+//create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 
 app.use(cors());
 app.use(express.json());
 
+//limit how often the backend can be called to avoid overspending API tokens, applied to all routes.
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 100
 });
 app.use(limiter);
 
+//main endpoint acting as a proxy to avoid exposing the secret API URL
 app.post("/", async (req, res) => {
   try {
     const response = await fetch(process.env.QUICKNODE_URL, {
@@ -34,6 +39,8 @@ app.post("/", async (req, res) => {
   }
 });
 
+
+//GET endpoint to fetch token pool info from GeckoTerminal API
 app.get("/token-info", async (req, res) => {
   const poolAddress = "857wGRbkBN7uAKdsdzop4BCQ8ZPeqKX8x3v6JDPbpSnc"; // CRL pool
   const url = `https://api.geckoterminal.com/api/v2/networks/solana/pools/${poolAddress}`;
@@ -48,6 +55,8 @@ app.get("/token-info", async (req, res) => {
   }
 });
 
+
+//GET endpoint to fetch total holders for a given token mint address
 app.get("/holders", async (req, res) => {
   const mint = req.query.mint;
   if (!mint) {
